@@ -1,10 +1,24 @@
 <!doctype html>
+{#
+  The page shell every screen extends. It renders whatever the UI
+  configuration gives it — stylesheets, brand wording and navigation — and
+  deliberately contains no role or business logic of its own:
+
+    stylesheets   app/web/templating.py  (tokens: static/theme.css)
+    brand wording app/web/templating.py  (name comes from APP_NAME)
+    nav links     app/web/navigation.py
+
+  A page template only needs to fill in {% block title %} and
+  {% block content %}.
+#}
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>{% block title %}LOOP{% endblock %}</title>
-  <link rel="stylesheet" href="/static/app.css" />
+  <title>{% block title %}{{ brand_name }}{% endblock %}</title>
+  {% for href in stylesheets %}
+  <link rel="stylesheet" href="{{ href }}" />
+  {% endfor %}
   <script>
     // Applied before first paint so the theme never flashes.
     (function () {
@@ -19,16 +33,14 @@
 {% if current_user %}
 <header class="topbar">
   <a class="brand" href="/">
-    <span class="brand-mark">LOOP</span>
-    <span class="brand-tagline">Local Operations &amp; Optimization Platform</span>
+    <span class="brand-mark">{{ brand_name }}</span>
+    <span class="brand-tagline">{{ brand_tagline }}</span>
   </a>
   <nav>
-    <a href="/">Home</a>
-    <a href="/tasks">Tasks</a>
-    {% if current_user.role.value == 'PROPRIETOR' %}
-      <a href="/tasks/new" class="primary-link">+ New Task</a>
-      <a href="/quotations">Quotations</a>
-    {% endif %}
+    {% for link in nav_for(current_user.role) %}
+    <a href="{{ link.href }}"{% if link.emphasis %} class="primary-link"{% endif %}>
+      {{ link.label }}</a>
+    {% endfor %}
   </nav>
   <div class="user">
     <span class="today-stamp">

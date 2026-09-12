@@ -1,46 +1,6 @@
 /* LOOP — deliberately small, fast, no external assets. */
 
-/* Light palette. Every colour is a token so the dark theme only re-declares
-   the tokens, never the rules below. */
-:root {
-  --bg: #f4f5f7;
-  --bg-deep: #eceef2;
-  --panel: #ffffff;
-  --panel-2: #fafbfc;
-  --line: #d8dce3;
-  --text: #1b1f24;
-  --heading: #0f1115;
-  --muted: #636b76;
-  --accent: #1d4ed8;
-  --accent-hover: #1740b6;
-  --field: #ffffff;
-  --shadow: 0 1px 2px rgba(16, 20, 28, .05);
-  --shadow-lift: 0 6px 20px rgba(16, 20, 28, .10);
-  --yet: #8a8f98;
-  --assigned: #b45309;
-  --progress: #1d4ed8;
-  --done: #15803d;
-}
-
-:root[data-theme="dark"] {
-  --bg: #0e1116;
-  --bg-deep: #090b0f;
-  --panel: #161a21;
-  --panel-2: #1b2029;
-  --line: #2a313c;
-  --text: #e4e7ec;
-  --heading: #f4f6f8;
-  --muted: #9aa3b0;
-  --accent: #5b8cff;
-  --accent-hover: #7aa2ff;
-  --field: #11151b;
-  --shadow: 0 1px 2px rgba(0, 0, 0, .4);
-  --shadow-lift: 0 8px 24px rgba(0, 0, 0, .45);
-  --yet: #79808b;
-  --assigned: #d97706;
-  --progress: #5b8cff;
-  --done: #22a55b;
-}
+/* Colours, shadows and spacing tokens live in theme.css. */
 
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--text);
@@ -159,9 +119,9 @@ table.entry .line-total { font-variant-numeric: tabular-nums; }
 .filters a:hover { text-decoration: none; border-color: var(--accent); }
 .filters a.active { background: var(--text); color: var(--bg); border-color: var(--text); }
 
-.alert { background: #fdecea; border: 1px solid #f5c2bd; color: #8a1c12;
-         padding: 10px 12px; border-radius: 6px; margin-bottom: 14px; font-size: 14px; }
-:root[data-theme="dark"] .alert { background: #3b1714; border-color: #6b2a23; color: #ffb4aa; }
+.alert { background: var(--alert-bg); border: 1px solid var(--alert-line);
+         color: var(--alert-text); padding: 10px 12px; border-radius: 6px;
+         margin-bottom: 14px; font-size: 14px; }
 .empty { padding: 28px; text-align: center; color: var(--muted); }
 .actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .num { text-align: right; }

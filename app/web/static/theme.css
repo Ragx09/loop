@@ -1,0 +1,51 @@
+/* LOOP design tokens — the single place to restyle the application.
+
+   Every rule in app.css refers to these variables, so changing a colour here
+   changes it everywhere, in both themes. Add a token rather than writing a
+   literal colour into a rule. */
+
+:root {
+  --bg: #f4f5f7;
+  --bg-deep: #eceef2;
+  --panel: #ffffff;
+  --panel-2: #fafbfc;
+  --line: #d8dce3;
+  --text: #1b1f24;
+  --heading: #0f1115;
+  --muted: #636b76;
+  --accent: #1d4ed8;
+  --accent-hover: #1740b6;
+  --field: #ffffff;
+  --shadow: 0 1px 2px rgba(16, 20, 28, .05);
+  --shadow-lift: 0 6px 20px rgba(16, 20, 28, .10);
+  --yet: #8a8f98;
+  --assigned: #b45309;
+  --progress: #1d4ed8;
+  --done: #15803d;
+  --alert-bg: #fdecea;
+  --alert-line: #f5c2bd;
+  --alert-text: #8a1c12;
+}
+
+:root[data-theme="dark"] {
+  --bg: #0e1116;
+  --bg-deep: #090b0f;
+  --panel: #161a21;
+  --panel-2: #1b2029;
+  --line: #2a313c;
+  --text: #e4e7ec;
+  --heading: #f4f6f8;
+  --muted: #9aa3b0;
+  --accent: #5b8cff;
+  --accent-hover: #7aa2ff;
+  --field: #11151b;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .4);
+  --shadow-lift: 0 8px 24px rgba(0, 0, 0, .45);
+  --yet: #79808b;
+  --assigned: #d97706;
+  --progress: #5b8cff;
+  --done: #22a55b;
+  --alert-bg: #3b1714;
+  --alert-line: #6b2a23;
+  --alert-text: #ffb4aa;
+}
