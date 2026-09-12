@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}LOOP{% endblock %}</title>
+  <link rel="stylesheet" href="/static/app.css" />
+  <script>
+    // Applied before first paint so the theme never flashes.
+    (function () {
+      try {
+        var saved = localStorage.getItem('loop-theme');
+        if (saved) document.documentElement.setAttribute('data-theme', saved);
+      } catch (e) { /* private mode: fall back to the light default */ }
+    })();
+  </script>
+</head>
+<body>
+{% if current_user %}
+<header class="topbar">
+  <a class="brand" href="/">
+    <span class="brand-mark">LOOP</span>
+    <span class="brand-tagline">Local Operations &amp; Optimization Platform</span>
+  </a>
+  <nav>
+    <a href="/">Home</a>
+    <a href="/tasks">Tasks</a>
+    {% if current_user.role.value == 'PROPRIETOR' %}
+      <a href="/tasks/new" class="primary-link">+ New Task</a>
+      <a href="/quotations">Quotations</a>
+    {% endif %}
+  </nav>
+  <div class="user">
+    <span class="today-stamp">
+      <b>{{ now().strftime('%A') }}</b><span>{{ now().strftime('%d %b %Y') }}</span>
+    </span>
+    <button class="theme-toggle" type="button" onclick="toggleTheme()"
+            title="Toggle dark mode" aria-label="Toggle dark mode">
+      <span class="only-light">☾</span><span class="only-dark">☀</span>
+    </button>
+    <span>{{ current_user.full_name }} · {{ current_user.role.label }}</span>
+    <form method="post" action="/logout"><button class="link">Sign out</button></form>
+  </div>
+</header>
+{% endif %}
+
+<main>
+  {% block content %}{% endblock %}
+</main>
+
+<script>
+  function toggleTheme() {
+    var root = document.documentElement;
+    var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem('loop-theme', next); } catch (e) { /* ignore */ }
+  }
+</script>
+</body>
+</html>

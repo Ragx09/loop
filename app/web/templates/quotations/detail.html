@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}{{ quotation.quotation_number }} — LOOP{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="row" style="align-items:flex-start;">
+    <div>
+      <h1 style="margin-bottom:2px;">{{ quotation.quotation_number }}</h1>
+      <div class="muted">
+        {{ quotation.business.name }} ·
+        {{ quotation.quotation_date.strftime('%d %b %Y') }} ·
+        format: {{ quotation.template_key }}
+      </div>
+    </div>
+    <div style="text-align:right; flex:0 0 auto;">
+      <a class="btn primary" href="/quotations/{{ quotation.id }}/pdf">Download PDF</a>
+    </div>
+  </div>
+
+  <p style="margin-top:14px;">
+    <span class="muted">Customer</span><br />
+    <b>{{ quotation.customer_name }}</b>
+    {% if quotation.customer_address %}<br />{{ quotation.customer_address }}{% endif %}
+  </p>
+
+  <table>
+    <thead>
+      <tr><th>Sr No.</th><th>HSN Code</th><th>Particulars</th>
+          <th class="num">Price (1 qty)</th><th class="num">Quantity</th>
+          <th class="num">Total Price</th></tr>
+    </thead>
+    <tbody>
+      {% for item in quotation.items %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>{{ item.hsn_code or '—' }}</td>
+        <td>{{ item.particulars }}</td>
+        <td class="num">{{ item.price | money }}</td>
+        <td class="num">{{ item.quantity }}</td>
+        <td class="num">{{ item.line_total | money }}</td>
+      </tr>
+      {% endfor %}
+      <tr>
+        <td colspan="5" class="num"><b>Total</b></td>
+        <td class="num"><b>{{ quotation.total | money }}</b></td>
+      </tr>
+    </tbody>
+  </table>
+
+  {% if quotation.notes %}<p style="margin-top:12px;">{{ quotation.notes }}</p>{% endif %}
+</div>
+
+<p><a href="/quotations">← Back to quotations</a></p>
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Home — LOOP{% endblock %}
+{% block content %}
+
+<section class="hero">
+  <h1>Good day, {{ current_user.full_name.split()[0] }}.</h1>
+  <p class="muted">{{ now().strftime('%A, %d %B %Y') }}</p>
+</section>
+
+<h2 class="section-title">Tools</h2>
+<div class="tool-grid">
+  {% for tool in tools %}
+  <a class="tool" href="{{ tool.href }}">
+    <span class="tool-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+           stroke-linecap="round" stroke-linejoin="round">
+        <path d="{{ tool.icon }}" />
+      </svg>
+    </span>
+    <span class="tool-name">{{ tool.name }}</span>
+    <span class="tool-desc">{{ tool.description }}</span>
+  </a>
+  {% endfor %}
+</div>
+
+<h2 class="section-title">
+  Tasks for Today
+  <span class="count-pill">{{ today_tasks | length }}</span>
+</h2>
+
+<div class="card" style="padding:0; overflow:hidden;">
+{% if today_tasks %}
+  <table>
+    <thead>
+      <tr>
+        <th>#</th><th>Type</th><th>Customer</th>
+        <th>Engineer</th><th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for task in today_tasks %}
+      <tr onclick="window.location='/tasks/{{ task.id }}'" style="cursor:pointer;">
+        <td><a href="/tasks/{{ task.id }}">{{ task.id }}</a></td>
+        <td>{{ task.task_type.label }}</td>
+        <td>{{ task.customer_name or '—' }}</td>
+        <td>{{ task.assigned_engineer.full_name if task.assigned_engineer else '—' }}</td>
+        <td><span class="tag {{ task.status.value }}">{{ task.status.label }}</span></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <div class="empty">Nothing is scheduled for today.</div>
+{% endif %}
+</div>
+{% endblock %}

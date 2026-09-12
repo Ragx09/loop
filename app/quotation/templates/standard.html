@@ -1,0 +1,74 @@
+{# Format: "standard" — a neutral tabular quotation used until the real Arcot
+   formats are supplied. Each supplied format becomes its own template file. #}
+{% extends "_base.html" %}
+
+{% block content %}
+<table class="meta">
+  <tr>
+    <td>
+      <div class="business-name">{{ business.name }}</div>
+      {% if business.address %}<div class="muted">{{ business.address }}</div>{% endif %}
+      {% if business.phone %}<div class="muted">Phone: {{ business.phone }}</div>{% endif %}
+      {% if business.email %}<div class="muted">Email: {{ business.email }}</div>{% endif %}
+      {% if business.gstin %}<div class="muted">GSTIN: {{ business.gstin }}</div>{% endif %}
+    </td>
+    <td class="num">
+      <div><b>Quotation No:</b> {{ doc.quotation_number }}</div>
+      <div><b>Date:</b> {{ doc.quotation_date.strftime('%d-%m-%Y') }}</div>
+    </td>
+  </tr>
+</table>
+
+<div class="title">QUOTATION</div>
+
+<table class="meta">
+  <tr>
+    <td>
+      <b>To,</b><br />
+      {{ doc.customer_name }}
+      {% if doc.customer_address %}<br /><span class="muted">{{ doc.customer_address }}</span>{% endif %}
+    </td>
+  </tr>
+</table>
+
+<br />
+
+<table class="items">
+  <thead>
+    <tr>
+      <th width="8%">Sr No.</th>
+      <th width="17%">HSN Code</th>
+      <th width="35%">Particulars</th>
+      <th width="15%">Price (1 qty)</th>
+      <th width="10%">Quantity</th>
+      <th width="15%">Total Price</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for line in doc.lines %}
+    <tr>
+      <td>{{ loop.index }}</td>
+      <td>{{ line.hsn_code or '' }}</td>
+      <td>{{ line.particulars }}</td>
+      <td class="num">{{ line.price | money }}</td>
+      <td class="num">{{ line.quantity }}</td>
+      <td class="num">{{ line.line_total | money }}</td>
+    </tr>
+    {% endfor %}
+    <tr>
+      <td colspan="5" class="num"><b>Total</b></td>
+      <td class="num"><b>{{ doc.total | money }}</b></td>
+    </tr>
+  </tbody>
+</table>
+
+{% if doc.notes %}
+<div class="footer"><b>Notes:</b><br />{{ doc.notes }}</div>
+{% endif %}
+
+<div class="footer">
+  For <b>{{ business.name }}</b>
+  <br /><br /><br />
+  Authorised Signatory
+</div>
+{% endblock %}

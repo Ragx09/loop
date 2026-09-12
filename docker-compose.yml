@@ -1,0 +1,44 @@
+# Local development environment for LOOP.
+# Usage:  docker compose up --build
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: loop-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-loop}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-loop}
+      POSTGRES_DB: ${POSTGRES_DB:-loop}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - loop_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-loop} -d ${POSTGRES_DB:-loop}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    container_name: loop-app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # Inside the compose network the database host is the service name.
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-loop}:${POSTGRES_PASSWORD:-loop}@db:5432/${POSTGRES_DB:-loop}
+      JWT_SECRET: ${JWT_SECRET:-dev-only-insecure-secret-change-me}
+      APP_ENV: ${APP_ENV:-development}
+    env_file:
+      - path: .env
+        required: false
+    ports:
+      - "${PORT:-8000}:8000"
+    command: >
+      sh -c "alembic upgrade head &&
+             uvicorn app.main:app --host 0.0.0.0 --port 8000"
+
+volumes:
+  loop_pgdata:

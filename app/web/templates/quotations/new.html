@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block title %}Generate Quotation — LOOP{% endblock %}
+{% block content %}
+<div class="card">
+  <h1>Generate Quotation</h1>
+
+  <form method="post" action="/quotations/new">
+    <div class="row">
+      <label>Business
+        <select name="business_id" required>
+          {% for business in businesses %}
+          <option value="{{ business.id }}">{{ business.name }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>Quotation Format
+        <select name="template_key" required>
+          {% for template in templates_available %}
+          <option value="{{ template.key }}">{{ template.name }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>Quotation No. (optional)
+        <input name="quotation_number" placeholder="Auto-generated if blank" />
+      </label>
+      <label>Date
+        <input type="date" name="quotation_date" value="{{ today }}" required />
+      </label>
+    </div>
+
+    <div class="row">
+      <label>Customer
+        <input name="customer_name" required autofocus />
+      </label>
+      <label>Customer Address (optional)
+        <input name="customer_address" />
+      </label>
+    </div>
+
+    <h2 style="margin-top:18px;">Particulars</h2>
+    <table class="entry">
+      <thead>
+        <tr>
+          <th style="width:6%">Sr No.</th>
+          <th style="width:16%">HSN Code</th>
+          <th style="width:38%">Particulars / Product</th>
+          <th style="width:15%">Price (1 qty)</th>
+          <th style="width:10%">Quantity</th>
+          <th style="width:15%" class="num">Total Price</th>
+        </tr>
+      </thead>
+      <tbody id="item-rows">
+        {% for _ in blank_rows %}
+        <tr>
+          <td class="sr">{{ loop.index }}</td>
+          <td><input name="hsn_code" /></td>
+          <td><input name="particulars" /></td>
+          <td><input name="price" inputmode="decimal" oninput="recalc()" /></td>
+          <td><input name="quantity" inputmode="numeric" value="1" oninput="recalc()" /></td>
+          <td class="num line-total">—</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="5" class="num"><b>Total</b></td>
+          <td class="num"><b id="grand-total">—</b></td>
+        </tr>
+      </tfoot>
+    </table>
+    <p><button class="btn" type="button" onclick="addRow()">+ Add row</button></p>
+
+    <label>Notes (optional)
+      <textarea name="notes"></textarea>
+    </label>
+
+    <div class="actions">
+      <button class="btn primary" type="submit">Generate Quotation</button>
+      <a class="btn" href="/quotations">Cancel</a>
+    </div>
+  </form>
+</div>
+
+<script>
+  // Live totals only — a convenience for the eye. The backend recomputes
+  // every total from the submitted price and quantity.
+  function money(value) {
+    return value.toLocaleString(undefined, {minimumFractionDigits: 2,
+                                            maximumFractionDigits: 2});
+  }
+
+  function recalc() {
+    var grand = 0;
+    document.querySelectorAll('#item-rows tr').forEach(function (row, index) {
+      var sr = row.querySelector('.sr');
+      if (sr) sr.textContent = index + 1;
+
+      var price = parseFloat(row.querySelector('[name=price]').value);
+      var qty = parseInt(row.querySelector('[name=quantity]').value, 10);
+      var cell = row.querySelector('.line-total');
+      if (isNaN(price)) { cell.textContent = '—'; return; }
+      if (isNaN(qty) || qty < 1) qty = 1;
+      var total = price * qty;
+      grand += total;
+      cell.textContent = money(total);
+    });
+    document.getElementById('grand-total').textContent = grand ? money(grand) : '—';
+  }
+
+  function addRow() {
+    var body = document.getElementById('item-rows');
+    var row = body.rows[0].cloneNode(true);
+    row.querySelectorAll('input').forEach(function (input) {
+      input.value = input.name === 'quantity' ? '1' : '';
+    });
+    row.querySelector('.line-total').textContent = '—';
+    body.appendChild(row);
+    recalc();
+  }
+
+  recalc();
+</script>
+{% endblock %}

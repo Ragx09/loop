@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}New Task — LOOP{% endblock %}
+{% block content %}
+<div class="card" style="max-width:720px;">
+  <h1>New Task</h1>
+  <p class="muted">Created date and time are recorded automatically.</p>
+
+  <form method="post" action="/tasks/new">
+    <div class="row">
+      <label>Task Type
+        <select name="task_type" required autofocus>
+          {% for type in types %}
+          <option value="{{ type.value }}">{{ type.label }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>Scheduled Date
+        <input type="date" name="scheduled_date" value="{{ today }}" required />
+      </label>
+    </div>
+
+    <div class="row">
+      <label>Customer Name
+        <input name="customer_name" placeholder="Optional at call time" />
+      </label>
+      <label>Model
+        <input name="model" />
+      </label>
+      <label>Meter Reading
+        <input name="meter_reading" />
+      </label>
+    </div>
+
+    <div class="row">
+      <label>Assign To (optional)
+        <select name="assigned_engineer_id">
+          <option value="">— Leave unassigned —</option>
+          {% for engineer in engineers %}
+          <option value="{{ engineer.id }}">
+            {% if engineer.id == current_user.id %}Myself ({{ engineer.full_name }})
+            {% else %}{{ engineer.full_name }}{% endif %}
+          </option>
+          {% endfor %}
+        </select>
+      </label>
+    </div>
+
+    <label>Notes
+      <textarea name="notes"></textarea>
+    </label>
+
+    <div class="actions">
+      <button class="btn primary" type="submit">Create Task</button>
+      <a class="btn" href="/tasks">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

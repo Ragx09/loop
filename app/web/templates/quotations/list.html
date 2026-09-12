@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Quotations — LOOP{% endblock %}
+{% block content %}
+<div class="row" style="align-items:center; margin-bottom:14px;">
+  <h1 style="margin:0;">Quotations</h1>
+  <div style="text-align:right; flex:0 0 auto;">
+    <a class="btn primary" href="/quotations/new">+ Generate Quotation</a>
+  </div>
+</div>
+
+<div class="card" style="padding:0; overflow:hidden;">
+{% if quotations %}
+  <table>
+    <thead>
+      <tr>
+        <th>Number</th><th>Date</th><th>Business</th>
+        <th>Customer</th><th>Format</th><th class="num">Total</th><th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for q in quotations %}
+      <tr>
+        <td><a href="/quotations/{{ q.id }}">{{ q.quotation_number }}</a></td>
+        <td>{{ q.quotation_date.strftime('%d %b %Y') }}</td>
+        <td>{{ q.business.name }}</td>
+        <td>{{ q.customer_name }}</td>
+        <td class="muted">{{ q.template_key }}</td>
+        <td class="num">{{ q.total | money }}</td>
+        <td><a href="/quotations/{{ q.id }}/pdf">PDF</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <div class="empty">No quotations generated yet.</div>
+{% endif %}
+</div>
+{% endblock %}

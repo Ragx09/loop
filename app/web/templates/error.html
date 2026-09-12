@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}LOOP — Problem{% endblock %}
+{% block content %}
+<div class="card narrow">
+  <h1>{{ status_code }}</h1>
+  <p>{{ message }}</p>
+  <a class="btn" href="/tasks">Back to tasks</a>
+</div>
+{% endblock %}

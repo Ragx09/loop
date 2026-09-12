@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Tasks — LOOP{% endblock %}
+{% block content %}
+
+<div class="row" style="align-items:center; margin-bottom:14px;">
+  <h1 style="margin:0;">Tasks</h1>
+  {% if current_user.role.value == 'PROPRIETOR' %}
+  <div style="text-align:right; flex:0 0 auto;">
+    <a class="btn primary" href="/tasks/new">+ New Task</a>
+  </div>
+  {% endif %}
+</div>
+
+<div class="filters">
+  <a href="/tasks" class="{% if not selected_status %}active{% endif %}">
+    All ({{ counts.values() | sum }})
+  </a>
+  {% for status in statuses %}
+  <a href="/tasks?status={{ status.value }}"
+     class="{% if selected_status == status %}active{% endif %}">
+    {{ status.label }} ({{ counts[status] }})
+  </a>
+  {% endfor %}
+</div>
+
+<div class="card" style="padding:0; overflow:hidden;">
+{% if tasks %}
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Type</th>
+        <th>Customer</th>
+        <th>Scheduled</th>
+        <th>Created</th>
+        <th>Engineer</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for task in tasks %}
+      <tr onclick="window.location='/tasks/{{ task.id }}'" style="cursor:pointer;">
+        <td><a href="/tasks/{{ task.id }}">{{ task.id }}</a></td>
+        <td>{{ task.task_type.label }}</td>
+        <td>{{ task.customer_name or '—' }}</td>
+        <td>{{ task.scheduled_date.strftime('%d %b %Y') }}</td>
+        <td class="muted">
+          {{ task.created_date.strftime('%d %b %Y') }}<br />
+          {{ task.created_time.strftime('%H:%M') }}
+        </td>
+        <td>{{ task.assigned_engineer.full_name if task.assigned_engineer else '—' }}</td>
+        <td><span class="tag {{ task.status.value }}">{{ task.status.label }}</span></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <div class="empty">No tasks here yet.</div>
+{% endif %}
+</div>
+{% endblock %}
