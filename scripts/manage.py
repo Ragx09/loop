@@ -5,6 +5,7 @@ Users are created here rather than being hard-coded anywhere in the app.
     python scripts/manage.py create-user --username raghav --name "Raghavendra" \
         --role PROPRIETOR --password "..."
     python scripts/manage.py list-users
+    python scripts/manage.py seed-demo [--reset]
 
 If --password is omitted the value of the LOOP_INITIAL_PASSWORD environment
 variable is used, so credentials never need to appear in shell history.
@@ -19,6 +20,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from app.core.errors import LoopError  # noqa: E402
 from app.db.session import SessionLocal  # noqa: E402
+from app.demo.seed import seed_demo  # noqa: E402
 from app.domain.enums import UserRole  # noqa: E402
 from app.services.auth_service import AuthService  # noqa: E402
 
@@ -61,6 +63,25 @@ def list_users(_: argparse.Namespace) -> int:
     return 0
 
 
+def seed_demo_command(args: argparse.Namespace) -> int:
+    """Populate the public demo with sample data.
+
+    Only ever runs when DEMO_MODE is enabled, so it cannot touch a real
+    database by accident — the guard lives in app/demo/seed.py.
+    """
+    with SessionLocal() as db:
+        try:
+            summary = seed_demo(db, reset=args.reset)
+        except LoopError as exc:
+            print(f"Could not seed the demo: {exc.message}")
+            return 1
+        print(
+            f"Demo ready: {summary.users} users, {summary.tasks} tasks, "
+            f"{summary.quotations} quotations."
+        )
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="LOOP management commands")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -74,6 +95,14 @@ def main() -> int:
 
     listing = sub.add_parser("list-users", help="List existing users")
     listing.set_defaults(func=list_users)
+
+    demo = sub.add_parser("seed-demo", help="Seed the public demo with sample data")
+    demo.add_argument(
+        "--reset",
+        action="store_true",
+        help="Wipe the existing demo data first, returning the demo to a clean state",
+    )
+    demo.set_defaults(func=seed_demo_command)
 
     args = parser.parse_args()
     return args.func(args)

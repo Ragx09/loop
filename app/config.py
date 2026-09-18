@@ -40,6 +40,16 @@ class Settings(BaseSettings):
     # Name of the cookie holding the access token for browser sessions.
     session_cookie_name: str = "loop_session"
 
+    # --- Demo mode -------------------------------------------------------
+    # Off everywhere except the public demo deployment. When off, the demo
+    # sign-in options are not rendered and the demo endpoint does not exist.
+    demo_mode: bool = False
+    #: Password given to the seeded demo accounts. Only the seed command reads
+    #: it; like every other credential it never appears in source.
+    demo_password: str | None = None
+    #: Wording of the strip shown to signed-in demo users.
+    demo_reset_note: str = "Demo data — resets daily."
+
     @property
     def is_production(self) -> bool:
         return self.app_env.lower() in {"production", "prod"}

@@ -25,6 +25,9 @@
   --alert-bg: #fdecea;
   --alert-line: #f5c2bd;
   --alert-text: #8a1c12;
+  --demo-bg: #fff8e6;
+  --demo-line: #e8d59b;
+  --demo-text: #7a5a10;
 }
 
 :root[data-theme="dark"] {
@@ -48,4 +51,7 @@
   --alert-bg: #3b1714;
   --alert-line: #6b2a23;
   --alert-text: #ffb4aa;
+  --demo-bg: #2a2313;
+  --demo-line: #4d4126;
+  --demo-text: #e5c977;
 }

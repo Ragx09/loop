@@ -56,6 +56,10 @@
 </header>
 {% endif %}
 
+{% if demo_notice and current_user %}
+<p class="demo-strip">{{ demo_notice }}</p>
+{% endif %}
+
 <main>
   {% block content %}{% endblock %}
 </main>

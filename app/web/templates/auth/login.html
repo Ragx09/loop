@@ -15,5 +15,21 @@
     <input type="hidden" name="next" value="{{ request.query_params.get('next', '/') }}" />
     <button class="btn primary" type="submit">Sign in</button>
   </form>
+
+  {# Only rendered on the public demo deployment: app/demo/accounts.py returns
+     nothing at all unless DEMO_MODE is on. #}
+  {% if demo_accounts %}
+  <div class="demo-panel">
+    <p class="demo-divider"><span>or</span></p>
+    <p class="muted">New here? Look around with sample data — no account needed.</p>
+    {% for account in demo_accounts %}
+    <form method="post" action="/login/demo">
+      <input type="hidden" name="account" value="{{ account.key }}" />
+      <button class="btn ghost" type="submit">{{ account.label }}</button>
+    </form>
+    <p class="demo-hint">{{ account.description }}</p>
+    {% endfor %}
+  </div>
+  {% endif %}
 </div>
 {% endblock %}

@@ -39,6 +39,12 @@ templates.env.globals["brand_tagline"] = "Local Operations & Optimization Platfo
 # a file here to add a stylesheet without touching any template.
 templates.env.globals["stylesheets"] = ("/static/theme.css", "/static/app.css")
 
+# Wording of the strip base.html shows to signed-in demo visitors, or None on a
+# real instance, where the strip is not rendered at all.
+templates.env.globals["demo_notice"] = (
+    get_settings().demo_reset_note if get_settings().demo_mode else None
+)
+
 
 def _money(value) -> str:
     if value in (None, ""):

@@ -126,6 +126,25 @@ table.entry .line-total { font-variant-numeric: tabular-nums; }
 .actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .num { text-align: right; }
 
+/* Demo mode: the sign-in options and the strip shown to demo visitors.
+   Rendered only when DEMO_MODE is on — see app/demo/accounts.py. */
+.btn.ghost { display: block; width: 100%; text-align: center;
+             border-color: var(--accent); color: var(--accent);
+             background: var(--panel); }
+.btn.ghost:hover { background: var(--panel-2); border-color: var(--accent-hover);
+                   color: var(--accent-hover); }
+.demo-panel { margin-top: 22px; }
+.demo-panel form { margin-top: 12px; }
+.demo-divider { display: flex; align-items: center; gap: 12px;
+                color: var(--muted); font-size: 13px; margin: 0 0 14px; }
+.demo-divider::before, .demo-divider::after { content: ""; flex: 1;
+                border-top: 1px solid var(--line); }
+.demo-hint { margin: 6px 0 0; color: var(--muted); font-size: 12px;
+             text-align: center; }
+.demo-strip { background: var(--demo-bg); border-bottom: 1px solid var(--demo-line);
+              color: var(--demo-text); font-size: 13px; padding: 7px 24px;
+              text-align: center; }
+
 @media (max-width: 640px) {
   .topbar { gap: 12px; }
   .today-stamp { border-right: 0; padding-right: 0; }
