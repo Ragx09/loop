@@ -45,52 +45,58 @@ class _TaskSpec:
     day_offset: int
     #: Status the task should end up in; reached through real transitions.
     status: TaskStatus
-    #: Index into the seeded engineer list, or None to leave it unassigned.
-    engineer: int | None = None
+    #: Username of the engineer this job belongs to, or None to leave it
+    #: unassigned. Named rather than indexed so the data below reads as it
+    #: behaves, whatever order the engineers come back in.
+    engineer: str | None = None
     meter_reading: str | None = None
     notes: str | None = None
 
 
+RAVI = DEMO_ACCOUNTS[1].username
+ANITA = DEMO_EXTRA_ENGINEERS[0][0]
+
 # A believable week: some jobs done, some running, some waiting to go out.
+# Ravi is the persona visitors sign in as, so he gets a job in every state.
 TASK_SPECS: tuple[_TaskSpec, ...] = (
     _TaskSpec(
         TaskType.SERVICE_CALL, "Sunrise Textiles", "Compressor CX-220", -4,
-        TaskStatus.COMPLETED, engineer=0, meter_reading="14820",
+        TaskStatus.COMPLETED, engineer=ANITA, meter_reading="14820",
         notes="Replaced worn drive belt and re-tensioned. Running clean.",
     ),
     _TaskSpec(
         TaskType.SEND_MATERIAL, "Meridian Packaging", "Sealing head SH-9", -3,
-        TaskStatus.COMPLETED, engineer=1,
+        TaskStatus.COMPLETED, engineer=RAVI,
         notes="Two spare sealing blades handed over at the gate.",
     ),
     _TaskSpec(
         TaskType.SERVICE_CALL, "Everest Plastics", "Injection unit IP-75", -1,
-        TaskStatus.COMPLETED, engineer=0, meter_reading="9312",
+        TaskStatus.COMPLETED, engineer=ANITA, meter_reading="9312",
         notes="Heater band replaced. Temperature holding steady.",
     ),
     _TaskSpec(
         TaskType.SERVICE_CALL, "Kaveri Cold Storage", "Condenser KC-4", 0,
-        TaskStatus.IN_PROGRESS, engineer=0, meter_reading="31770",
+        TaskStatus.IN_PROGRESS, engineer=ANITA, meter_reading="31770",
         notes="On site. Checking the low-pressure cut-out.",
     ),
     _TaskSpec(
         TaskType.SEND_MATERIAL, "Nandi Engineering Works", "Gearbox NG-12", 0,
-        TaskStatus.IN_PROGRESS, engineer=1,
+        TaskStatus.IN_PROGRESS, engineer=RAVI,
         notes="Oil seals picked up, heading out after lunch.",
     ),
     _TaskSpec(
         TaskType.SERVICE_CALL, "Deccan Paper Mills", "Roller drive DR-30", 0,
-        TaskStatus.ASSIGNED, engineer=1,
+        TaskStatus.ASSIGNED, engineer=RAVI,
         notes="Customer reports intermittent stalling under load.",
     ),
     _TaskSpec(
         TaskType.SERVICE_CALL, "Pioneer Rubber", "Mixer PR-500", 1,
-        TaskStatus.ASSIGNED, engineer=0,
+        TaskStatus.ASSIGNED, engineer=ANITA,
         notes="Annual service. Carry the full filter set.",
     ),
     _TaskSpec(
         TaskType.SEND_MATERIAL, "Sunrise Textiles", "Compressor CX-220", 2,
-        TaskStatus.ASSIGNED, engineer=1,
+        TaskStatus.ASSIGNED, engineer=RAVI,
         notes="Air filter cartridges, two units.",
     ),
     _TaskSpec(
@@ -215,7 +221,9 @@ def seed_demo(db: Session, *, reset: bool = False) -> SeedSummary:
         return SeedSummary(users=len(_demo_usernames()), tasks=0, quotations=0)
 
     proprietor = users.get_by_username(DEMO_ACCOUNTS[0].username)
-    engineers = users.list_by_role(UserRole.SERVICE_ENGINEER)
+    engineers = {
+        e.username: e.id for e in users.list_by_role(UserRole.SERVICE_ENGINEER)
+    }
 
     return SeedSummary(
         users=len(_demo_usernames()),
@@ -224,15 +232,13 @@ def seed_demo(db: Session, *, reset: bool = False) -> SeedSummary:
     )
 
 
-def _seed_tasks(db: Session, proprietor: User, engineers: list[User]) -> int:
+def _seed_tasks(db: Session, proprietor: User, engineers: dict[str, int]) -> int:
     service = TaskService(db)
     today = date.today()
     created = 0
 
     for spec in TASK_SPECS:
-        assignee = None
-        if spec.engineer is not None and engineers:
-            assignee = engineers[spec.engineer % len(engineers)].id
+        assignee = engineers.get(spec.engineer) if spec.engineer else None
 
         task = service.create_task(
             proprietor,

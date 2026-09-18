@@ -128,7 +128,11 @@ def test_demo_engineer_lands_on_their_task_list(client, demo_data):
     assert response.headers["location"] == "/"
     tasks = client.get("/tasks")
     assert tasks.status_code == 200
-    # Their own jobs only: an unassigned task must not be visible to them.
+    # Their own jobs, in more than one state, so the demo has something to do.
+    assert "Nandi Engineering Works" in tasks.text
+    assert "Deccan Paper Mills" in tasks.text
+    # Never anyone else's work, and never an unassigned task.
+    assert "Kaveri Cold Storage" not in tasks.text
     assert "Coastal Foods" not in tasks.text
 
 
