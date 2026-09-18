@@ -76,6 +76,7 @@ page that should now be shown (so a refresh never re-submits).
 | Which URL renders which screen | `app/web/routes/*.py` | Adding a page, or a form field |
 | Rules, permissions, workflow | `app/services/*.py` | Behaviour changes (**not** the UI) |
 | Status/type/role display names | `app/domain/enums.py` | "In Progress" should read differently |
+| Demo sign-in options on the login page | `app/demo/accounts.py` | Adding/renaming a demo persona (see `docs/DEMO.md`) |
 
 Quotation **PDF** templates are a separate system (`app/quotation/templates/`).
 They are print documents, not screens, and share nothing with the CSS above —
@@ -110,6 +111,7 @@ Available in *all* templates, with no route changes needed
 | `now()` | Current date/time, evaluated at render time |
 | `TaskStatus`, `TaskType` | Enums, so templates never hard-code strings |
 | `| money` | `1234.5` → `1,234.50` |
+| `demo_notice` | Wording of the demo strip, or `None` on a real instance |
 
 Three rules keep the UI replaceable:
 

@@ -1,0 +1,19 @@
+# Keep local files out of the image. The .env entry matters most: without it,
+# `docker build` on the laptop would bake real credentials into the image.
+.env
+*.env
+!.env.example
+.git
+.github
+.venv
+venv
+__pycache__
+*.py[cod]
+.pytest_cache
+.mypy_cache
+*.sqlite3
+*.db
+generated
+*.pdf
+.idea
+.vscode

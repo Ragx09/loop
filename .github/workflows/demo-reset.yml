@@ -1,0 +1,39 @@
+# Returns the public demo to a clean state.
+#
+# Render's own cron jobs are a paid feature, so the reset runs here instead.
+# It talks straight to the demo database; the web service is untouched and
+# keeps serving throughout.
+#
+# Required repository secrets:
+#   DEMO_DATABASE_URL  the demo PostgreSQL connection string
+#   DEMO_PASSWORD      the same value set on the Render service
+name: Reset demo data
+
+on:
+  schedule:
+    # 20:30 UTC = 02:00 IST, when nobody is likely to be looking at the demo.
+    - cron: "30 20 * * *"
+  workflow_dispatch:
+
+jobs:
+  reset:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: Reseed the demo
+        env:
+          DATABASE_URL: ${{ secrets.DEMO_DATABASE_URL }}
+          DEMO_PASSWORD: ${{ secrets.DEMO_PASSWORD }}
+          DEMO_MODE: "true"
+          APP_ENV: production
+          # Not used by the seed, but Settings reads it at import time.
+          JWT_SECRET: unused-by-the-seed-command
+        run: python scripts/manage.py seed-demo --reset

@@ -1,0 +1,33 @@
+# Render blueprint for the public LOOP demo.
+#
+# This describes the demo deployment only. The real instance runs on the
+# laptop (see docs/RUNNING.md) and is not affected by anything here.
+#
+# The database is a separate PostgreSQL containing nothing but the fictional
+# data created by `scripts/manage.py seed-demo`. DATABASE_URL and DEMO_PASSWORD
+# are entered in the Render dashboard and never committed — see docs/DEMO.md.
+
+services:
+  - type: web
+    name: loop-demo
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerCommand: sh ./scripts/start.sh
+    healthCheckPath: /health
+    envVars:
+      - key: APP_NAME
+        value: LOOP
+      - key: APP_ENV
+        # Also what makes the session cookie Secure — see app/config.py.
+        value: production
+      - key: DEBUG
+        value: "false"
+      - key: DEMO_MODE
+        value: "true"
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        sync: false
+      - key: DEMO_PASSWORD
+        sync: false
