@@ -88,11 +88,24 @@ an unmigrated schema.
 
 ### Seed it once
 
-The first deploy migrates but does not seed. In Render → **Shell**:
+The first deploy creates the tables but does not fill them. Seed from your own
+machine, pointing at the Supabase database:
 
 ```sh
-python scripts/manage.py seed-demo
+DEMO_MODE=true \
+DEMO_PASSWORD='<the same value you set on Render>' \
+DATABASE_URL='<the Supabase URL>' \
+  python scripts/manage.py seed-demo
 ```
+
+Environment variables take priority over `.env`, so this does not disturb your
+local configuration. Check `DATABASE_URL` before running it — `--reset` deletes
+data, and the only thing standing between this command and the wrong database
+is the value you paste here.
+
+> Render's **Shell** tab would be the obvious place to run this, but shell
+> access is not included on the free instance type. Seeding from your machine
+> works on any plan.
 
 Reload the sign-in page; the demo options are there.
 
