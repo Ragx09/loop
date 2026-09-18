@@ -1,0 +1,26 @@
+{# Shared skeleton for invoices and service reports. Deliberately mirrors the
+   quotation base so printed LOOP documents look like one family. #}
+<html>
+<head>
+  <meta charset="utf-8" />
+  <style>
+    @page { size: A4; margin: 1.6cm 1.4cm; }
+    body { font-family: Helvetica, Arial, sans-serif; font-size: 10pt; color: #111; }
+    .business-name { font-size: 17pt; font-weight: bold; }
+    .muted { color: #555; }
+    .title { font-size: 13pt; font-weight: bold; text-align: center;
+             margin: 14px 0 10px 0; letter-spacing: 1px; }
+    table { width: 100%; border-collapse: collapse; }
+    table.items td, table.items th { border: 1px solid #444; padding: 5px 6px; }
+    table.items th { background-color: #eeeeee; font-weight: bold; text-align: left; }
+    .num { text-align: right; }
+    .meta td { padding: 2px 0; vertical-align: top; }
+    .totals td { padding: 3px 6px; }
+    .footer { margin-top: 26px; font-size: 9pt; }
+    {% block styles %}{% endblock %}
+  </style>
+</head>
+<body>
+{% block content %}{% endblock %}
+</body>
+</html>

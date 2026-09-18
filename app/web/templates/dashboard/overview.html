@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — {{ brand_name }}{% endblock %}
+
+{# Charts are plain inline SVG: no chart library, no JavaScript, and they work
+   in both themes because every colour is a token from theme.css. #}
+{% macro bar_chart(series, money_values=False) %}
+  {% set values = series | map(attribute='value') | list %}
+  {% set peak = values | max if values else 0 %}
+  <div class="chart">
+    {% for point in series %}
+    {% set height = (point.value / peak * 100) if peak else 0 %}
+    <div class="chart-col" title="{{ point.label }}: {{ point.value }}">
+      <div class="chart-bar" style="height: {{ height }}%;"></div>
+      <span class="chart-label">{{ point.label }}</span>
+    </div>
+    {% endfor %}
+    {% if not series %}<p class="muted">No data yet.</p>{% endif %}
+  </div>
+{% endmacro %}
+
+{% block content %}
+<div class="row" style="align-items:center; margin-bottom:14px;">
+  <h1 style="margin:0;">Dashboard</h1>
+  <div style="text-align:right; flex:0 0 auto;">
+    <a class="btn" href="/tasks/new">+ New Task</a>
+    <a class="btn" href="/invoices/new">+ New Invoice</a>
+  </div>
+</div>
+
+<div class="row">
+  <div class="card"><p class="muted">Invoiced</p>
+    <p class="stat">{{ invoiced_total | money }}</p></div>
+  <div class="card"><p class="muted">Collected</p>
+    <p class="stat" style="color:var(--done);">{{ collected_total | money }}</p></div>
+  <div class="card"><p class="muted">Outstanding</p>
+    <p class="stat" style="color:var(--assigned);">{{ outstanding_total | money }}</p></div>
+  <div class="card"><p class="muted">Customers</p>
+    <p class="stat">{{ customer_count }}</p></div>
+  <div class="card"><p class="muted">Open jobs</p>
+    <p class="stat">{{ open_tasks }}</p></div>
+  <div class="card"><p class="muted">Completed</p>
+    <p class="stat">{{ completed_tasks }}</p></div>
+</div>
+
+<div class="row">
+  <div class="card">
+    <h2>Revenue by month</h2>
+    {{ bar_chart(revenue_by_month, money_values=True) }}
+  </div>
+  <div class="card">
+    <h2>Jobs by month</h2>
+    {{ bar_chart(tasks_by_month) }}
+  </div>
+</div>
+
+<div class="row">
+  <div class="card">
+    <h2>Top customers</h2>
+    {% if top_customers %}
+    <table>
+      <tbody>
+        {% for row in top_customers %}
+        <tr><td>{{ row.label }}</td><td class="num">{{ row.value | money }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}<p class="muted">No invoices yet.</p>{% endif %}
+  </div>
+
+  <div class="card">
+    <h2>Jobs completed by engineer</h2>
+    {% if engineer_completions %}
+    <table>
+      <tbody>
+        {% for row in engineer_completions %}
+        <tr><td>{{ row.label }}</td><td class="num">{{ row.value }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}<p class="muted">No completed jobs yet.</p>{% endif %}
+  </div>
+
+  <div class="card">
+    <h2>Jobs by status</h2>
+    <table>
+      <tbody>
+        {% for status, count in tasks_by_status.items() %}
+        <tr><td>{{ status.label }}</td><td class="num">{{ count }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="row">
+  <div class="card">
+    <h2>Today's schedule</h2>
+    {% if tasks_today %}
+    <table>
+      <thead><tr><th>#</th><th>Customer</th><th>Type</th>
+        <th>Engineer</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for t in tasks_today %}
+        <tr>
+          <td><a href="/tasks/{{ t.id }}">{{ t.id }}</a></td>
+          <td>{{ t.customer.name if t.customer else (t.customer_name or '—') }}</td>
+          <td>{{ t.task_type.label }}</td>
+          <td>{{ t.assigned_engineer.full_name if t.assigned_engineer else '—' }}</td>
+          <td>{{ t.status.label }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}<p class="muted">Nothing scheduled for today.</p>{% endif %}
+  </div>
+
+  <div class="card">
+    <h2>Low stock</h2>
+    {% if low_stock %}
+    <table>
+      <thead><tr><th>Item</th><th class="num">Stock</th><th class="num">Min</th></tr></thead>
+      <tbody>
+        {% for item in low_stock %}
+        <tr><td>{{ item.name }}</td>
+          <td class="num"><b style="color:var(--assigned);">{{ item.stock_qty }}</b></td>
+          <td class="num muted">{{ item.min_stock }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}<p class="muted">Every item is above its minimum.</p>{% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -27,9 +27,13 @@ class NavLink:
 
 NAV_LINKS: tuple[NavLink, ...] = (
     NavLink("Home", "/", EVERYONE),
+    NavLink("Dashboard", "/dashboard", PROPRIETOR_ONLY),
     NavLink("Tasks", "/tasks", EVERYONE),
-    NavLink("+ New Task", "/tasks/new", PROPRIETOR_ONLY, emphasis=True),
+    NavLink("Customers", "/customers", PROPRIETOR_ONLY),
     NavLink("Quotations", "/quotations", PROPRIETOR_ONLY),
+    NavLink("Invoices", "/invoices", PROPRIETOR_ONLY),
+    NavLink("Inventory", "/inventory", EVERYONE),
+    NavLink("+ New Task", "/tasks/new", PROPRIETOR_ONLY, emphasis=True),
 )
 
 

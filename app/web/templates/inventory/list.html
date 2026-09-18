@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Inventory — {{ brand_name }}{% endblock %}
+{% block content %}
+<div class="row" style="align-items:center; margin-bottom:14px;">
+  <h1 style="margin:0;">Inventory</h1>
+  <div style="text-align:right; flex:0 0 auto;">
+    {% if current_user.role == UserRole.PROPRIETOR %}
+    <a class="btn primary" href="/inventory/new">+ New Item</a>
+    {% endif %}
+  </div>
+</div>
+
+{% if low_stock %}
+<div class="alert">
+  {{ low_stock | length }} item(s) at or below minimum stock:
+  {% for item in low_stock %}{{ item.name }}{% if not loop.last %}, {% endif %}{% endfor %}
+</div>
+{% endif %}
+
+<form method="get" action="/inventory" class="inline" style="margin-bottom:14px;">
+  <label>Search <input name="q" value="{{ search }}" placeholder="Name or SKU" /></label>
+  <button class="btn" type="submit">Search</button>
+</form>
+
+<div class="card" style="padding:0; overflow:hidden;">
+{% if items %}
+  <table>
+    <thead>
+      <tr>
+        <th>SKU</th><th>Name</th><th>Category</th><th>HSN</th>
+        <th class="num">Selling</th><th class="num">Stock</th><th class="num">Min</th>
+        {% if current_user.role == UserRole.PROPRIETOR %}<th></th>{% endif %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in items %}
+      <tr>
+        <td class="muted">{{ item.sku }}</td>
+        <td>{{ item.name }}</td>
+        <td class="muted">{{ item.category or '—' }}</td>
+        <td class="muted">{{ item.hsn_code or '—' }}</td>
+        <td class="num">{{ item.selling_price | money or '—' }}</td>
+        <td class="num">
+          {% if item.is_low_stock %}<b style="color:var(--assigned);">{{ item.stock_qty }}</b>
+          {% else %}{{ item.stock_qty }}{% endif %}
+        </td>
+        <td class="num muted">{{ item.min_stock }}</td>
+        {% if current_user.role == UserRole.PROPRIETOR %}
+        <td>
+          <form method="post" action="/inventory/{{ item.id }}/stock" class="inline">
+            <input name="stock_qty" value="{{ item.stock_qty }}" style="width:70px;" />
+            <button class="btn" type="submit">Set</button>
+          </form>
+        </td>
+        {% endif %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <div class="empty">No inventory items yet.</div>
+{% endif %}
+</div>
+{% endblock %}

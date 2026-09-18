@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}{{ invoice.invoice_number }} — {{ brand_name }}{% endblock %}
+{% block content %}
+<div class="row" style="align-items:center; margin-bottom:14px;">
+  <h1 style="margin:0;">{{ invoice.invoice_number }}</h1>
+  <div style="text-align:right; flex:0 0 auto;">
+    <a class="btn" href="/invoices">All invoices</a>
+    <a class="btn primary" href="/invoices/{{ invoice.id }}/pdf">Download PDF</a>
+  </div>
+</div>
+
+<div class="row">
+  <div class="card">
+    <h2>Details</h2>
+    <p class="muted">
+      <b>{{ invoice.customer.name }}</b><br />
+      {{ invoice.business.name }}<br />
+      Date: {{ invoice.invoice_date.strftime('%d %b %Y') }}<br />
+      Due: {{ invoice.due_date.strftime('%d %b %Y') if invoice.due_date else '—' }}<br />
+      Status: <b>{{ invoice.status.label }}</b>
+      {% if invoice.quotation_id %}
+      <br />From quotation
+      <a href="/quotations/{{ invoice.quotation_id }}">#{{ invoice.quotation_id }}</a>
+      {% endif %}
+    </p>
+  </div>
+  <div class="card">
+    <h2>Balance</h2>
+    <p style="font-size:26px; margin:0;"><b>{{ invoice.balance_due | money }}</b></p>
+    <p class="muted">of {{ invoice.total | money }} total ·
+      {{ invoice.amount_paid | money }} paid</p>
+  </div>
+</div>
+
+<div class="card" style="padding:0; overflow:hidden;">
+  <table>
+    <thead><tr><th>Particulars</th><th>HSN</th><th class="num">Qty</th>
+      <th class="num">Rate</th><th class="num">GST %</th><th class="num">Amount</th></tr></thead>
+    <tbody>
+      {% for item in invoice.items %}
+      <tr>
+        <td>{{ item.particulars }}</td>
+        <td class="muted">{{ item.hsn_code or '—' }}</td>
+        <td class="num">{{ item.quantity }}</td>
+        <td class="num">{{ item.price | money }}</td>
+        <td class="num muted">{{ item.tax_rate }}</td>
+        <td class="num">{{ item.line_total | money }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="card">
+  <h2>Tax breakdown</h2>
+  <table>
+    <tbody>
+      <tr><td>Subtotal</td><td class="num">{{ invoice.subtotal | money }}</td></tr>
+      {% for row in invoice.tax_breakdown %}
+      <tr><td class="muted">{{ row.label }}</td>
+        <td class="num">{{ row.amount | money }}</td></tr>
+      {% endfor %}
+      <tr><td><b>Total</b></td>
+        <td class="num"><b>{{ invoice.total | money }}</b></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="card">
+  <h2>Payments</h2>
+  {% if invoice.payments %}
+  <table>
+    <thead><tr><th>Date</th><th>Method</th><th>Reference</th>
+      <th class="num">Amount</th></tr></thead>
+    <tbody>
+      {% for p in invoice.payments %}
+      <tr>
+        <td>{{ p.paid_at.strftime('%d %b %Y') }}</td>
+        <td>{{ p.method.label }}</td>
+        <td class="muted">{{ p.reference or '—' }}</td>
+        <td class="num">{{ p.amount | money }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="muted">No payments recorded.</p>
+  {% endif %}
+
+  {% if invoice.balance_due > 0 %}
+  <form method="post" action="/invoices/{{ invoice.id }}/payments" class="inline"
+        style="margin-top:12px;">
+    <label>Amount <input name="amount" required style="width:120px;"
+      placeholder="{{ invoice.balance_due }}" /></label>
+    <label>Method
+      <select name="method">
+        {% for m in methods %}<option value="{{ m.value }}">{{ m.label }}</option>{% endfor %}
+      </select>
+    </label>
+    <label>Date <input type="date" name="paid_at" value="{{ today }}" /></label>
+    <label>Reference <input name="reference" /></label>
+    <button class="btn primary" type="submit">Record Payment</button>
+  </form>
+  {% endif %}
+</div>
+{% endblock %}

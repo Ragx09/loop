@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}New Invoice — {{ brand_name }}{% endblock %}
+{% block content %}
+<div class="card">
+  <h1>New Invoice</h1>
+  {% if quotation %}
+  <div class="alert" style="background:var(--panel-2); border-color:var(--line);
+       color:var(--text);">
+    Lines copied from quotation <b>{{ quotation.quotation_number }}</b>. Editing them
+    here does not change the quotation.
+  </div>
+  {% endif %}
+
+  <form method="post" action="/invoices/new">
+    {% if quotation %}
+    <input type="hidden" name="quotation_id" value="{{ quotation.id }}" />
+    {% endif %}
+    <div class="row">
+      <label>Business
+        <select name="business_id" required>
+          {% for b in businesses %}
+          <option value="{{ b.id }}"
+            {% if quotation and quotation.business_id == b.id %}selected{% endif %}>
+            {{ b.name }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>Customer
+        <select name="customer_id" required>
+          {% for c in customers %}
+          <option value="{{ c.id }}"
+            {% if quotation and quotation.customer_name == c.name %}selected{% endif %}>
+            {{ c.name }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>Invoice No. (optional)
+        <input name="invoice_number" placeholder="Auto-generated if blank" />
+      </label>
+    </div>
+    <div class="row">
+      <label>Date <input type="date" name="invoice_date" value="{{ today }}" required /></label>
+      <label>Due date <input type="date" name="due_date" /></label>
+      <label style="flex:0 0 auto; align-self:flex-end;">
+        <input type="checkbox" name="is_interstate" /> Inter-state (IGST)
+      </label>
+    </div>
+
+    <h2 style="margin-top:18px;">Particulars</h2>
+    <table>
+      <thead>
+        <tr><th>Particulars</th><th style="width:120px;">HSN</th>
+          <th style="width:90px;">Qty</th><th style="width:130px;">Rate</th>
+          <th style="width:110px;">GST %</th></tr>
+      </thead>
+      <tbody>
+        {% set rows = quotation.items if quotation else [] %}
+        {% for item in rows %}
+        <tr>
+          <td><input name="particulars" value="{{ item.particulars }}" /></td>
+          <td><input name="hsn_code" value="{{ item.hsn_code or '' }}" /></td>
+          <td><input name="quantity" value="{{ item.quantity }}" /></td>
+          <td><input name="price" value="{{ item.price }}" /></td>
+          <td><input name="tax_rate" value="18" /></td>
+        </tr>
+        {% endfor %}
+        {% for _ in blank_rows %}
+        <tr>
+          <td><input name="particulars" /></td>
+          <td><input name="hsn_code" /></td>
+          <td><input name="quantity" value="1" /></td>
+          <td><input name="price" /></td>
+          <td><input name="tax_rate" value="18" /></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <label style="margin-top:14px;">Notes <textarea name="notes">{{ quotation.notes if quotation else '' }}</textarea></label>
+    <div class="actions">
+      <button class="btn primary" type="submit">Create Invoice</button>
+      <a class="btn" href="/invoices">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

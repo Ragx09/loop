@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}New Customer — {{ brand_name }}{% endblock %}
+{% block content %}
+<div class="card narrow" style="max-width:640px;">
+  <h1>New Customer</h1>
+  <form method="post" action="/customers/new">
+    <label>Name
+      <input name="name" required autofocus />
+    </label>
+    <div class="row">
+      <label>Phone <input name="phone" /></label>
+      <label>Email <input name="email" type="email" /></label>
+    </div>
+    <label>Address <textarea name="address"></textarea></label>
+    <label>GSTIN <input name="gstin" /></label>
+    <label>Notes <textarea name="notes"></textarea></label>
+    <div class="actions">
+      <button class="btn primary" type="submit">Create Customer</button>
+      <a class="btn" href="/customers">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

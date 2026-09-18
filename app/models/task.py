@@ -35,6 +35,16 @@ class Task(TimestampMixin, Base):
     meter_reading: Mapped[str | None] = mapped_column(String(60), nullable=True)
     notes: Mapped[str | None] = mapped_column(String(1000), nullable=True)
 
+    # Optional links to the CRM. The free-text fields above are kept and still
+    # work on their own, so every task created before customers existed is
+    # unaffected; attaching a customer later is purely additive.
+    customer_id: Mapped[int | None] = mapped_column(
+        ForeignKey("customers.id", ondelete="SET NULL"), nullable=True, index=True
+    )
+    equipment_id: Mapped[int | None] = mapped_column(
+        ForeignKey("equipment.id", ondelete="SET NULL"), nullable=True, index=True
+    )
+
     assigned_engineer_id: Mapped[int | None] = mapped_column(
         ForeignKey("users.id", ondelete="RESTRICT"), nullable=True, index=True
     )
@@ -47,6 +57,14 @@ class Task(TimestampMixin, Base):
     )
     created_by: Mapped["User"] = relationship(  # noqa: F821
         foreign_keys=[created_by_id], lazy="joined"
+    )
+    customer: Mapped["Customer | None"] = relationship(lazy="joined")  # noqa: F821
+    equipment: Mapped["Equipment | None"] = relationship(lazy="joined")  # noqa: F821
+    materials: Mapped[list["MaterialUsed"]] = relationship(  # noqa: F821
+        cascade="all, delete-orphan", lazy="selectin"
+    )
+    report: Mapped["ServiceReport | None"] = relationship(  # noqa: F821
+        back_populates="task", uselist=False, cascade="all, delete-orphan", lazy="selectin"
     )
 
     __table_args__ = (

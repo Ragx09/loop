@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Invoices — {{ brand_name }}{% endblock %}
+{% block content %}
+<div class="row" style="align-items:center; margin-bottom:14px;">
+  <h1 style="margin:0;">Invoices</h1>
+  <div style="text-align:right; flex:0 0 auto;">
+    <a class="btn" href="/invoices/payments">Payments</a>
+    <a class="btn primary" href="/invoices/new">+ New Invoice</a>
+  </div>
+</div>
+
+<div class="card" style="padding:0; overflow:hidden;">
+{% if invoices %}
+  <table>
+    <thead>
+      <tr>
+        <th>Number</th><th>Date</th><th>Customer</th><th>Business</th>
+        <th>Status</th><th class="num">Total</th><th class="num">Due</th><th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for i in invoices %}
+      <tr>
+        <td><a href="/invoices/{{ i.id }}">{{ i.invoice_number }}</a></td>
+        <td>{{ i.invoice_date.strftime('%d %b %Y') }}</td>
+        <td>{{ i.customer.name }}</td>
+        <td class="muted">{{ i.business.name }}</td>
+        <td>{{ i.status.label }}</td>
+        <td class="num">{{ i.total | money }}</td>
+        <td class="num">{{ i.balance_due | money }}</td>
+        <td><a href="/invoices/{{ i.id }}/pdf">PDF</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <div class="empty">No invoices yet.</div>
+{% endif %}
+</div>
+{% endblock %}

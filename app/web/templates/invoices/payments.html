@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Payments — {{ brand_name }}{% endblock %}
+{% block content %}
+<h1>Payments</h1>
+
+<div class="row">
+  <div class="card"><p class="muted">Invoiced</p>
+    <p style="font-size:24px; margin:0;"><b>{{ invoiced_total | money }}</b></p></div>
+  <div class="card"><p class="muted">Collected</p>
+    <p style="font-size:24px; margin:0; color:var(--done);">
+      <b>{{ collected_total | money }}</b></p></div>
+  <div class="card"><p class="muted">Outstanding</p>
+    <p style="font-size:24px; margin:0; color:var(--assigned);">
+      <b>{{ outstanding | money }}</b></p></div>
+  <div class="card"><p class="muted">Overdue</p>
+    <p style="font-size:24px; margin:0; color:var(--alert-text);">
+      <b>{{ overdue | money }}</b></p></div>
+  <div class="card"><p class="muted">Collected today</p>
+    <p style="font-size:24px; margin:0;"><b>{{ collected_today | money }}</b></p></div>
+</div>
+
+<div class="card" style="padding:0; overflow:hidden;">
+  <table>
+    <thead><tr><th>Invoice</th><th>Customer</th><th>Due date</th><th>Status</th>
+      <th class="num">Total</th><th class="num">Paid</th><th class="num">Balance</th></tr></thead>
+    <tbody>
+      {% for i in unpaid %}
+      <tr>
+        <td><a href="/invoices/{{ i.id }}">{{ i.invoice_number }}</a></td>
+        <td>{{ i.customer.name }}</td>
+        <td>{{ i.due_date.strftime('%d %b %Y') if i.due_date else '—' }}</td>
+        <td>{{ i.status.label }}</td>
+        <td class="num">{{ i.total | money }}</td>
+        <td class="num">{{ i.amount_paid | money }}</td>
+        <td class="num"><b>{{ i.balance_due | money }}</b></td>
+      </tr>
+      {% else %}
+      <tr><td colspan="7" class="empty">Everything is paid up.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

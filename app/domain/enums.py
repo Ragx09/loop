@@ -39,3 +39,39 @@ class TaskStatus(str, Enum):
             "IN_PROGRESS": "In Progress",
             "COMPLETED": "Completed",
         }[self.value]
+
+
+class InvoiceStatus(str, Enum):
+    """Derived from payments received, never set by hand — see InvoiceService."""
+
+    PENDING = "PENDING"
+    PARTIALLY_PAID = "PARTIALLY_PAID"
+    PAID = "PAID"
+    OVERDUE = "OVERDUE"
+
+    @property
+    def label(self) -> str:
+        return {
+            "PENDING": "Pending",
+            "PARTIALLY_PAID": "Partially Paid",
+            "PAID": "Paid",
+            "OVERDUE": "Overdue",
+        }[self.value]
+
+
+class PaymentMethod(str, Enum):
+    CASH = "CASH"
+    BANK_TRANSFER = "BANK_TRANSFER"
+    UPI = "UPI"
+    CHEQUE = "CHEQUE"
+    CARD = "CARD"
+
+    @property
+    def label(self) -> str:
+        return {
+            "CASH": "Cash",
+            "BANK_TRANSFER": "Bank Transfer",
+            "UPI": "UPI",
+            "CHEQUE": "Cheque",
+            "CARD": "Card",
+        }[self.value]

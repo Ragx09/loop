@@ -76,8 +76,9 @@ def seed_demo_command(args: argparse.Namespace) -> int:
             print(f"Could not seed the demo: {exc.message}")
             return 1
         print(
-            f"Demo ready: {summary.users} users, {summary.tasks} tasks, "
-            f"{summary.quotations} quotations."
+            f"Demo ready: {summary.users} users, {summary.customers} customers, "
+            f"{summary.tasks} tasks, {summary.quotations} quotations, "
+            f"{summary.invoices} invoices, {summary.inventory} inventory items."
         )
     return 0
 

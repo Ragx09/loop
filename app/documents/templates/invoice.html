@@ -1,0 +1,100 @@
+{% extends "_base.html" %}
+{% block content %}
+<table class="meta">
+  <tr>
+    <td>
+      <div class="business-name">{{ business.name }}</div>
+      {% if business.address %}<div class="muted">{{ business.address }}</div>{% endif %}
+      {% if business.phone %}<div class="muted">Phone: {{ business.phone }}</div>{% endif %}
+      {% if business.email %}<div class="muted">{{ business.email }}</div>{% endif %}
+      {% if business.gstin %}<div class="muted">GSTIN: {{ business.gstin }}</div>{% endif %}
+    </td>
+    <td class="num" style="width:38%;">
+      <div><b>Invoice No:</b> {{ invoice.invoice_number }}</div>
+      <div><b>Date:</b> {{ invoice.invoice_date.strftime('%d-%m-%Y') }}</div>
+      {% if invoice.due_date %}
+      <div><b>Due:</b> {{ invoice.due_date.strftime('%d-%m-%Y') }}</div>
+      {% endif %}
+      <div><b>Status:</b> {{ invoice.status.label }}</div>
+    </td>
+  </tr>
+</table>
+
+<div class="title">TAX INVOICE</div>
+
+<table class="meta">
+  <tr>
+    <td>
+      <b>Billed to</b><br />
+      {{ invoice.customer.name }}<br />
+      {% if invoice.customer.address %}
+      <span class="muted">{{ invoice.customer.address }}</span><br />
+      {% endif %}
+      {% if invoice.customer.gstin %}
+      <span class="muted">GSTIN: {{ invoice.customer.gstin }}</span>
+      {% endif %}
+    </td>
+  </tr>
+</table>
+
+<br />
+<table class="items">
+  <thead>
+    <tr>
+      <th style="width:5%;">#</th>
+      <th>Particulars</th>
+      <th style="width:12%;">HSN/SAC</th>
+      <th style="width:8%;" class="num">Qty</th>
+      <th style="width:15%;" class="num">Rate</th>
+      <th style="width:17%;" class="num">Amount</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in invoice.items %}
+    <tr>
+      <td>{{ loop.index }}</td>
+      <td>{{ item.particulars }}</td>
+      <td>{{ item.hsn_code or '' }}</td>
+      <td class="num">{{ item.quantity }}</td>
+      <td class="num">{{ item.price | money }}</td>
+      <td class="num">{{ item.line_total | money }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<br />
+<table class="totals" style="width:50%; margin-left:50%;">
+  <tr>
+    <td>Subtotal</td>
+    <td class="num">{{ invoice.subtotal | money }}</td>
+  </tr>
+  {% for row in invoice.tax_breakdown %}
+  <tr>
+    <td class="muted">{{ row.label }}</td>
+    <td class="num">{{ row.amount | money }}</td>
+  </tr>
+  {% endfor %}
+  <tr>
+    <td><b>Total</b></td>
+    <td class="num"><b>{{ invoice.total | money }}</b></td>
+  </tr>
+  {% if invoice.amount_paid %}
+  <tr>
+    <td>Paid</td>
+    <td class="num">{{ invoice.amount_paid | money }}</td>
+  </tr>
+  <tr>
+    <td><b>Balance Due</b></td>
+    <td class="num"><b>{{ invoice.balance_due | money }}</b></td>
+  </tr>
+  {% endif %}
+</table>
+
+{% if invoice.notes %}
+<div class="footer"><b>Notes:</b> {{ invoice.notes }}</div>
+{% endif %}
+<div class="footer muted">
+  This is a computer-generated invoice.
+</div>
+{% endblock %}

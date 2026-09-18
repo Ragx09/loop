@@ -17,6 +17,7 @@ from sqlalchemy.orm import Session
 from app.config import get_settings
 from app.core.errors import ValidationError
 from app.demo.accounts import DEMO_ACCOUNTS, DEMO_EXTRA_ENGINEERS
+from app.demo.extra_seed import reset_extra, seed_extra
 from app.domain.enums import TaskStatus, TaskType, UserRole
 from app.models.quotation import Quotation, QuotationItem
 from app.models.task import Task
@@ -34,6 +35,9 @@ class SeedSummary:
     users: int
     tasks: int
     quotations: int
+    customers: int = 0
+    inventory: int = 0
+    invoices: int = 0
 
 
 @dataclass(frozen=True)
@@ -178,6 +182,9 @@ def reset_demo(db: Session) -> None:
     """Remove everything a previous seed created, in foreign-key order."""
     _assert_demo_mode()
 
+    # The CRM, inventory and invoicing rows go first: they reference tasks.
+    reset_extra(db)
+
     db.execute(delete(QuotationItem))
     db.execute(delete(Quotation))
     db.execute(delete(Task))
@@ -225,10 +232,17 @@ def seed_demo(db: Session, *, reset: bool = False) -> SeedSummary:
         e.username: e.id for e in users.list_by_role(UserRole.SERVICE_ENGINEER)
     }
 
+    tasks = _seed_tasks(db, proprietor, engineers)
+    quotations = _seed_quotations(db, proprietor)
+    extra = seed_extra(db, proprietor)
+
     return SeedSummary(
         users=len(_demo_usernames()),
-        tasks=_seed_tasks(db, proprietor, engineers),
-        quotations=_seed_quotations(db, proprietor),
+        tasks=tasks,
+        quotations=quotations,
+        customers=extra["customers"],
+        inventory=extra["inventory"],
+        invoices=extra["invoices"],
     )
 
 

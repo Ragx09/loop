@@ -12,7 +12,7 @@ from pathlib import Path
 from fastapi.templating import Jinja2Templates
 
 from app.config import get_settings
-from app.domain.enums import TaskStatus, TaskType
+from app.domain.enums import InvoiceStatus, TaskStatus, TaskType, UserRole
 from app.web.navigation import nav_for
 
 TEMPLATE_DIR = Path(__file__).resolve().parent / "templates"
@@ -26,6 +26,8 @@ templates.env.globals["now"] = datetime.now
 # Enums are exposed so templates never hard-code status/type strings.
 templates.env.globals["TaskStatus"] = TaskStatus
 templates.env.globals["TaskType"] = TaskType
+templates.env.globals["UserRole"] = UserRole
+templates.env.globals["InvoiceStatus"] = InvoiceStatus
 
 # Top-bar links, filtered by role: {% for link in nav_for(current_user.role) %}.
 templates.env.globals["nav_for"] = nav_for

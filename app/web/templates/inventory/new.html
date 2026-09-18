@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}New Inventory Item — {{ brand_name }}{% endblock %}
+{% block content %}
+<div class="card narrow" style="max-width:640px;">
+  <h1>New Inventory Item</h1>
+  <form method="post" action="/inventory/new">
+    <div class="row">
+      <label>SKU <input name="sku" required autofocus placeholder="BRG-6204" /></label>
+      <label>Name <input name="name" required /></label>
+    </div>
+    <div class="row">
+      <label>Category <input name="category" /></label>
+      <label>HSN Code <input name="hsn_code" /></label>
+    </div>
+    <div class="row">
+      <label>Purchase Price <input name="purchase_price" /></label>
+      <label>Selling Price <input name="selling_price" /></label>
+    </div>
+    <div class="row">
+      <label>Opening Stock <input name="stock_qty" value="0" /></label>
+      <label>Minimum Stock <input name="min_stock" value="0" /></label>
+    </div>
+    <div class="actions">
+      <button class="btn primary" type="submit">Create Item</button>
+      <a class="btn" href="/inventory">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

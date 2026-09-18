@@ -11,10 +11,12 @@ from sqlalchemy.orm import Session
 from app.core.errors import NotFoundError, PermissionDeniedError, ValidationError
 from app.domain.enums import TaskStatus, TaskType, UserRole
 from app.domain.task_workflow import find_transition, next_statuses
+from app.models.service_report import ServiceReport
 from app.models.task import Task
 from app.models.user import User
 from app.repositories.task_repository import TaskRepository
 from app.repositories.user_repository import UserRepository
+from app.services.inventory_service import InventoryService
 
 
 class TaskService:
@@ -183,7 +185,83 @@ class TaskService:
         self.db.refresh(task)
         return task
 
+    # --- field work -------------------------------------------------------
+    def add_material(self, actor: User, task_id: int, item_id: int, quantity):
+        """Record a part used on a job. Stock is decremented by InventoryService.
+
+        Allowed while the job is in progress: materials are what the engineer
+        actually fitted, so they cannot be added before work starts or changed
+        after the job is signed off.
+        """
+        task = self.get_for_user(actor, task_id)
+        self._assert_can_work_on(actor, task)
+
+        if task.status is not TaskStatus.IN_PROGRESS:
+            raise ValidationError("Start the job before recording materials used.")
+
+        material = InventoryService(self.db).record_material_used(
+            actor, task, item_id, quantity, commit=False
+        )
+        self.db.commit()
+        self.db.refresh(task)
+        return material
+
+    def complete_with_report(
+        self,
+        actor: User,
+        task_id: int,
+        *,
+        work_performed: str,
+        meter_reading: str | None = None,
+        customer_signature: str | None = None,
+    ) -> ServiceReport:
+        """Finish a job and write its service report in one step.
+
+        The status change goes through change_status, so the workflow rules are
+        the same ones every other transition obeys.
+        """
+        task = self.get_for_user(actor, task_id)
+        self._assert_can_work_on(actor, task)
+
+        work_performed = (work_performed or "").strip()
+        if not work_performed:
+            raise ValidationError("Describe the work performed before completing.")
+        if task.report is not None:
+            raise ValidationError("This job already has a service report.")
+
+        if meter_reading:
+            task.meter_reading = _clean(meter_reading)
+
+        report = ServiceReport(
+            task_id=task.id,
+            work_performed=work_performed,
+            meter_reading=task.meter_reading,
+            customer_signature=_clean(customer_signature),
+            created_by_id=actor.id,
+        )
+        self.db.add(report)
+        self.db.flush()
+
+        # Raises if the task is not in a state that may be completed.
+        self.change_status(actor, task.id, TaskStatus.COMPLETED)
+        self.db.refresh(report)
+        return report
+
+    def get_report(self, actor: User, task_id: int) -> ServiceReport:
+        task = self.get_for_user(actor, task_id)
+        if task.report is None:
+            raise NotFoundError("This job has no service report yet.")
+        return task.report
+
     # --- authorization helpers -------------------------------------------
+    @staticmethod
+    def _assert_can_work_on(actor: User, task: Task) -> None:
+        """Who may record field work: the assigned engineer, or the proprietor."""
+        if actor.role is UserRole.PROPRIETOR:
+            return
+        if task.assigned_engineer_id != actor.id:
+            raise PermissionDeniedError("This task is not assigned to you.")
+
     @staticmethod
     def _is_assignable(actor: User, candidate: User) -> bool:
         """Who a task may be handed to.
